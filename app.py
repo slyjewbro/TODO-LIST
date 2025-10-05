@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 app = Flask(__name__)
-
+app.secret_key='lfkdsagjlg1324'
 # Создаем необходимые папки
 for folder in ['templates', 'static', 'static/images']:
     if not os.path.exists(folder):
@@ -134,4 +134,4 @@ def edit_task(task_id):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=500,host='127.0.0.1')
+    app.run(debug=False, port=500,host='127.0.0.1')

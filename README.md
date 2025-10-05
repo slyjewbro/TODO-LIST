@@ -25,3 +25,7 @@
 ```bash
 git clone https://github.com/ваш-username/todo-list.git
 cd todo-list
+python3 app.py
+
+Далее можете зайти по серверу и посмотреть сайт
+127.0.0.1:500

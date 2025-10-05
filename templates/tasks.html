@@ -1,0 +1,60 @@
+<div class="todo-app">
+    <div class="add-task-form">
+        <h2><i class="fas fa-edit"></i> Редактировать задачу</h2>
+        <form action="{{ url_for('edit_task', task_id=task.id) }}" method="POST" class="task-form">
+            <div class="form-group">
+                <input type="text" name="title" value="{{ task.title }}" required class="task-input">
+            </div>
+            
+            <div class="form-group">
+                <textarea name="description" placeholder="Описание" class="task-textarea">{{ task.description or '' }}</textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Приоритет:</label>
+                    <select name="priority" class="priority-select">
+                        <option value="1" {% if task.priority == 1 %}selected{% endif %}>🔴 Высокий</option>
+                        <option value="2" {% if task.priority == 2 %}selected{% endif %}>🟡 Средний</option>
+                        <option value="3" {% if task.priority == 3 %}selected{% endif %}>🟢 Низкий</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Категория:</label>
+                    <select name="category" class="category-select">
+                        <option value="">Без категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}" {% if task.category == category %}selected{% endif %}>{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Дата выполнения:</label>
+                    <input type="date" name="due_date" value="{{ task.due_date or '' }}" class="task-input">
+                </div>
+                
+                <div class="form-group">
+                    <label>Оценка времени (мин):</label>
+                    <input type="number" name="estimated_time" value="{{ task.estimated_time or '' }}" min="1" max="480" class="task-input" placeholder="30">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Теги (через запятую):</label>
+                <input type="text" name="tags" value="{{ task.tags or '' }}" placeholder="работа, срочно, проект" class="task-input">
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="add-btn">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+                <a href="{{ url_for('index') }}" class="cancel-btn">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

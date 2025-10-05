@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-tasks"></i> Мой To-Do List</h1>
+            <p>Организуй свои задачи эффективно</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Форма добавления задачи -->
+            <div class="add-task-card">
+                <h2><i class="fas fa-plus-circle"></i> Новая задача</h2>
+                <form action="{{ url_for('add_task') }}" method="POST" class="task-form">
+                    <div class="form-group">
+                        <input type="text" name="title" placeholder="Что нужно сделать?" required class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <textarea name="description" placeholder="Описание (необязательно)" class="form-textarea"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Приоритет:</label>
+                            <select name="priority" class="form-select">
+                                <option value="1">🔴 Высокий</option>
+                                <option value="2" selected>🟡 Средний</option>
+                                <option value="3">🟢 Низкий</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Категория:</label>
+                            <select name="category" class="form-select">
+                                <option value="">Без категории</option>
+                                {% for category in categories %}
+                                <option value="{{ category }}">{{ category }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Дата выполнения:</label>
+                        <input type="date" name="due_date" class="form-input">
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-plus"></i> Добавить задачу
+                    </button>
+                </form>
+            </div>
+
+            <!-- Список задач -->
+            <div class="tasks-section">
+                <h2><i class="fas fa-list-check"></i> Мои задачи</h2>
+                
+                {% if tasks %}
+                <div class="tasks-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ tasks|length }}</span>
+                        <span class="stat-label">Всего</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ tasks|selectattr("completed")|list|length }}</span>
+                        <span class="stat-label">Выполнено</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ tasks|rejectattr("completed")|list|length }}</span>
+                        <span class="stat-label">Осталось</span>
+                    </div>
+                </div>
+
+                <div class="tasks-list">
+                    {% for task in tasks %}
+                    <div class="task-card {% if task.completed %}completed{% endif %} {% if task.is_overdue %}overdue{% endif %} priority-{{ task.priority }}">
+                        <div class="task-content">
+                            <div class="task-header">
+                                <h3 class="task-title">{{ task.title }}</h3>
+                                <div class="task-meta-badges">
+                                    {% if task.priority == 1 %}
+                                    <span class="badge badge-high">🔴 Высокий</span>
+                                    {% elif task.priority == 2 %}
+                                    <span class="badge badge-medium">🟡 Средний</span>
+                                    {% else %}
+                                    <span class="badge badge-low">🟢 Низкий</span>
+                                    {% endif %}
+                                    
+                                    {% if task.category %}
+                                    <span class="badge badge-category">{{ task.category }}</span>
+                                    {% endif %}
+                                    
+                                    {% if task.due_date %}
+                                    <span class="badge {% if task.is_overdue %}badge-overdue{% else %}badge-due{% endif %}">
+                                        <i class="fas fa-calendar"></i> {{ task.due_date }}
+                                        {% if task.is_overdue %} ⚠️{% endif %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if task.description %}
+                            <p class="task-description">{{ task.description }}</p>
+                            {% endif %}
+                            
+                            <div class="task-footer">
+                                <span class="task-date">
+                                    <i class="fas fa-clock"></i> {{ task.created_at }}
+                                </span>
+                                
+                                <div class="task-actions">
+                                    <a href="{{ url_for('complete_task', task_id=task.id) }}" 
+                                       class="btn btn-complete" 
+                                       title="{% if task.completed %}Вернуть в работу{% else %}Выполнить{% endif %}">
+                                        <i class="fas fa-{% if task.completed %}undo{% else %}check{% endif %}"></i>
+                                    </a>
+                                    
+                                    <a href="{{ url_for('edit_task', task_id=task.id) }}" 
+                                       class="btn btn-edit" 
+                                       title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <a href="{{ url_for('delete_task', task_id=task.id) }}" 
+                                       class="btn btn-delete" 
+                                       onclick="return confirm('Удалить задачу?')"
+                                       title="Удалить">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>Пока нет задач</h3>
+                    <p>Добавь свою первую задачу выше!</p>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Простые анимации
+        document.addEventListener('DOMContentLoaded', function() {
+            // Анимация появления задач
+            const taskCards = document.querySelectorAll('.task-card');
+            taskCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Подсветка при наведении
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.1)';
+                });
+                btn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

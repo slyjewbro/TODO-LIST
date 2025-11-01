@@ -23,7 +23,7 @@
 
 1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/ваш-username/todo-list.git
+git clone https://github.com/slyjewbro/todo-list.git
 cd todo-list
 python3 app.py
 
